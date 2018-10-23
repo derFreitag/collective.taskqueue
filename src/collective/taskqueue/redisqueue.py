@@ -9,6 +9,12 @@ from collective.taskqueue.taskqueue import TaskQueueTransactionDataManager
 from plone.memoize import forever
 from zope.interface import implementer
 
+import hashlib
+import logging
+
+
+logger = logging.getLogger('redisqueue')
+
 
 class RedisTaskQueueTDM(TaskQueueTransactionDataManager):
 
@@ -60,7 +66,7 @@ class RedisTaskQueue(TaskQueueBase):
         if not self._requeued_processing:
             self._requeue_processing(consumer_name)
         try:
-            msg = self.redis.rpoplpush(self.redis_key, consumer_key)
+            msg = self.get_next_k4_task(consumer_key)
         except redis.ConnectionError:
             msg = None
         return self.deserialize(msg)
@@ -86,3 +92,54 @@ class RedisTaskQueue(TaskQueueBase):
     def reset(self):
         for key in self.redis.keys(self.redis_key + '*'):
             self.redis.ltrim(key, 1, 0)
+
+    def get_next_k4_task(self, consumer_key):
+        loop = True
+        loop_count = 0
+        hash_first_msg, _ = self._next_in_queue(first=True)
+
+        if not hash_first_msg:
+            return
+
+        while loop and loop_count < 50:
+            md5_next_msg, next_msg = self._next_in_queue()
+
+            if hash_first_msg == md5_next_msg or self._k4_in_payload(next_msg):
+                loop = False
+                continue
+
+            self.redis.rpoplpush(self.redis_key, self.redis_key)
+            loop_count += 1
+
+        if loop_count == 50:
+            self._warn_too_much_looping()
+
+        return self.redis.rpoplpush(self.redis_key, consumer_key)
+
+    def _next_in_queue(self, first=False):
+        if first:
+            msg = self.redis.rpoplpush(self.redis_key, self.redis_key)
+        else:
+            msg = self.redis.lindex(self.redis_key, -1)
+
+        if msg:
+            hex_digest = hashlib.md5(msg).hexdigest()
+            return hex_digest, msg
+
+        return None, None
+
+    def _k4_in_payload(self, msg):
+        if msg:
+            unpacked_data = self.deserialize(msg)
+            url = unpacked_data['url']
+            return '/@@k4-postprocess' in url
+
+    def _warn_too_much_looping(self):
+        length = self.redis.llen(self.redis_key)
+        logger.warning(
+            ' '.join([
+                'Could not loop through the queue. ',
+                'Either the queue is too large ({0}) '.format(length),
+                'or something happened',
+            ])
+        )

@@ -10,6 +10,10 @@ Changelog
 - Fix profile so that it installs.
   [gforcada]
 
+- Loop through all the elements in the queue looking for tasks related to k4 imports.
+  A hacked way to have some priority to a fixed set of tasks.
+  [gforcada]
+
 0.8.2 (2017-01-03)
 ------------------
 

@@ -101,6 +101,9 @@ class RedisTaskQueue(TaskQueueBase):
         loop_count = 0
         hash_first_msg, _ = self._next_in_queue(first=True)
 
+        if not hash_first_msg:
+            return
+
         while loop and loop_count < 50:
             md5_next_msg, next_msg = self._next_in_queue()
 
@@ -120,8 +123,12 @@ class RedisTaskQueue(TaskQueueBase):
             msg = self.redis.rpoplpush(self.redis_key, self.redis_key)
         else:
             msg = self.redis.lindex(self.redis_key, -1)
-        hex_digest = hashlib.md5(msg).hexdigest()
-        return hex_digest, msg
+
+        if msg:
+            hex_digest = hashlib.md5(msg).hexdigest()
+            return hex_digest, msg
+
+        return None, None
 
     def _k4_in_payload(self, msg):
         unpacked_data = self.deserialize(msg)

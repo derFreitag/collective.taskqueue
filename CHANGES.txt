@@ -4,8 +4,8 @@ Changelog
 0.8.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
-
+- Fix last version, the logic was wrong.
+  [gforcada]
 
 0.8.3.dev2 (2018-10-30)
 -----------------------

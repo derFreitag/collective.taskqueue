@@ -4,7 +4,8 @@ Changelog
 0.8.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Handle next message to also be empty.
+  [gforcada]
 
 
 0.8.3.dev1 (2018-10-29)

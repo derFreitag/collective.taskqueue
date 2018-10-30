@@ -107,11 +107,12 @@ class RedisTaskQueue(TaskQueueBase):
         while loop and loop_count < 50:
             md5_next_msg, next_msg = self._next_in_queue()
 
-            if hash_first_msg == md5_next_msg or self._k4_in_payload(next_msg):
+            if next_msg and hash_first_msg == md5_next_msg or self._k4_in_payload(next_msg):
                 loop = False
-            else:
-                self.redis.rpoplpush(self.redis_key, self.redis_key)
-                loop_count += 1
+                continue
+
+            self.redis.rpoplpush(self.redis_key, self.redis_key)
+            loop_count += 1
 
         if loop_count == 50:
             self._warn_too_much_looping()

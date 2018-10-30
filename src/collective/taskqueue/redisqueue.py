@@ -107,7 +107,7 @@ class RedisTaskQueue(TaskQueueBase):
         while loop and loop_count < 50:
             md5_next_msg, next_msg = self._next_in_queue()
 
-            if next_msg and hash_first_msg == md5_next_msg or self._k4_in_payload(next_msg):
+            if hash_first_msg == md5_next_msg or self._k4_in_payload(next_msg):
                 loop = False
                 continue
 
@@ -132,9 +132,10 @@ class RedisTaskQueue(TaskQueueBase):
         return None, None
 
     def _k4_in_payload(self, msg):
-        unpacked_data = self.deserialize(msg)
-        url = unpacked_data['url']
-        return '/@@k4-postprocess' in url
+        if msg:
+            unpacked_data = self.deserialize(msg)
+            url = unpacked_data['url']
+            return '/@@k4-postprocess' in url
 
     def _warn_too_much_looping(self):
         length = self.redis.llen(self.redis_key)

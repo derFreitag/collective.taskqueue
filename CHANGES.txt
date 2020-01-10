@@ -7,6 +7,9 @@ Changelog
 - use `@implementer` decorator
   [petschki]
 
+- Fix profile so that it installs.
+  [gforcada]
+
 0.8.2 (2017-01-03)
 ------------------
 

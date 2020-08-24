@@ -4,8 +4,30 @@ Changelog
 0.8.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Loop through all the elements in the queue looking for tasks related to k4 imports.
+  A hacked way to have some priority to a fixed set of tasks.
+  [gforcada]
 
+- Assume Plone 5, redis and msgpack are available (to simplify the code).
+  [gforcada]
+
+- Remove the server side of `collective.taskqueue`, this removes any ties with ZServer,
+  allowing `collective.taskqueue` to be used in Python 3.
+  [gforcada]
+
+- Add a browser view that replaces the server, an external system (cronjob...) can
+  call it do process async tasks.
+  [gforcada]
+
+- More py3 compatibility fixes.
+  [gforcada]
+
+- Refactor queues configuration to not use ZConfig,
+  as it depended on ZServer, which is not available on python 3.
+  [gforcada]
+
+- Drop `five.globalrequest` dependency.
+  [gforcada]
 
 0.8.2 (2017-01-03)
 ------------------

@@ -4,8 +4,12 @@ Changelog
 1.0.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix profile so that it installs.
+  [gforcada]
 
+- Loop through all the elements in the queue looking for tasks related to k4 imports.
+  A hacked way to have some priority to a fixed set of tasks.
+  [gforcada]
 
 1.0 (2020-02-10)
 ----------------

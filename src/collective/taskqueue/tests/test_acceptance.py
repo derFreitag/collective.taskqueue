@@ -2,7 +2,6 @@
 from collective.taskqueue import taskqueue
 from collective.taskqueue.config import HAS_MSGPACK
 from collective.taskqueue.config import HAS_REDIS
-from collective.taskqueue.config import HAVE_PLONE_5
 from collective.taskqueue.testing import REDIS_TASK_QUEUE_ZSERVER_FIXTURE
 from collective.taskqueue.testing import TASK_QUEUE_ZSERVER_FIXTURE
 from collective.taskqueue.testing import ZSERVER_FIXTURE
@@ -34,12 +33,10 @@ class TaskQueueFormLayer(PloneSandboxLayer):
         #               context=configurationContext)
         # z2.installProduct(app, 'collective.taskqueue.pasplugin')
 
-        if HAVE_PLONE_5:
-            import plone.app.contenttypes
-
-            xmlconfig.file(
-                "configure.zcml", plone.app.contenttypes, context=configurationContext
-            )
+        import plone.app.contenttypes
+        xmlconfig.file(
+            "configure.zcml", plone.app.contenttypes, context=configurationContext
+        )
 
         import collective.taskqueue.tests
 
@@ -51,8 +48,7 @@ class TaskQueueFormLayer(PloneSandboxLayer):
 
     def setUpPloneSite(self, portal):
         portal.portal_workflow.setDefaultChain("simple_publication_workflow")
-        if HAVE_PLONE_5:
-            self.applyProfile(portal, "plone.app.contenttypes:default")
+        self.applyProfile(portal, "plone.app.contenttypes:default")
         # self.applyProfile(portal, 'collective.taskqueue.pasplugin:default')
 
 

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from collective.taskqueue.config import TASK_QUEUE_IDENT
-from collective.taskqueue.config import TASK_QUEUE_SERVER_IDENT
 from collective.taskqueue.interfaces import ITaskQueue
 from zope.component import provideUtility
 
@@ -56,41 +55,3 @@ class TaskQueueFactory(object):
         task_queue.server_name = "%s:%s" % (self.server_name, self.queue)
 
         return task_queue
-
-
-class TaskQueueServerFactory(object):
-    def __init__(self, section):
-        self.ip = None
-        self.port = None
-        self.host = None
-        self.server_name = TASK_QUEUE_SERVER_IDENT
-
-        self.name = section.name
-        self.queue = section.queue
-        self.concurrent_limit = section.concurrent_limit
-        self.retry_max_count = section.retry_max_count
-
-    def prepare(self, *args, **kwargs):
-        return
-
-    def servertype(self):
-        return self.server_name
-
-    def create(self):
-        from ZServer.AccessLogger import access_logger
-        from collective.taskqueue.server import TaskQueueServer
-
-        server = TaskQueueServer(
-            name=self.name,
-            queue=self.queue,
-            concurrent_limit=self.concurrent_limit,
-            retry_max_count=self.retry_max_count,
-            access_logger=access_logger,
-        )
-
-        # Support plone.app.debugtoolbar:
-        server.ip = self.ip
-        server.port = self.port
-        server.server_name = "%s:%s" % (self.server_name, self.queue)
-
-        return server

@@ -50,10 +50,12 @@ class TaskQueueFactory(object):
         return self.server_name
 
     def create(self):
-        if not "." in self.type:
-            mod = __import__("collective.taskqueue", fromlist=[self.type])
-            klass = getattr(mod, self.type)
+        if self.type == 'redis':
+            from collective.taskqueue import redis as klass
+        elif self.type == 'local':
+            from collective.taskqueue import local as klass
         else:
+            # support custom task queues
             mod = __import__(
                 self.type[: self.type.rfind(".")],
                 fromlist=[self.type[self.type.rfind(".") + 1 :]],

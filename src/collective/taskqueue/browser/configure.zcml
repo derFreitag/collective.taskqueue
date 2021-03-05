@@ -1,0 +1,12 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser">
+
+  <browser:page
+    class="collective.taskqueue.browser.views.ProcessTaskView"
+    for="Products.CMFPlone.interfaces.IPloneSiteRoot"
+    name="process-async-tasks"
+    permission="cmf.ManagePortal"
+    />
+
+</configure>

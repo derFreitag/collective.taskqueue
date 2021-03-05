@@ -12,7 +12,7 @@ from zope.component import getUtility
 
 try:
     from Products.PlonePAS.Extensions.Install import activatePluginInterfaces
-except ModuleNotFoundError:
+except ImportError:
     # python 3
     from Products.PlonePAS.setuphandlers import activatePluginInterfaces
 

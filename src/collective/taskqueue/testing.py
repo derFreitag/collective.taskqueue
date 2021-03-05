@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 from App.config import getConfiguration
+from collective.taskqueue import redisqueue
 from collective.taskqueue import taskqueue
-from collective.taskqueue.config import HAS_MSGPACK
-from collective.taskqueue.config import HAS_REDIS
 from collective.taskqueue.interfaces import ITaskQueue
 from plone.testing import Layer
 from plone.testing import z2
@@ -11,9 +10,6 @@ from zope.configuration import xmlconfig
 import asyncore
 import logging
 
-
-if HAS_REDIS and HAS_MSGPACK:
-    from collective.taskqueue import redisqueue
 
 logger = logging.getLogger("collective.taskqueue")
 

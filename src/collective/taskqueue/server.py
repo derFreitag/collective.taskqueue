@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from collective.taskqueue.config import HAS_REDIS
 from collective.taskqueue.config import TASK_QUEUE_SERVER_IDENT
 from collective.taskqueue.interfaces import ITaskQueue
 from collective.taskqueue.interfaces import ITaskQueueLayer
@@ -114,14 +113,11 @@ class TaskQueueServer(asyncore.dispatcher):
 
         # Init asyncore dispatcher readability
         if self._readable is None:
-            if HAS_REDIS:
-                from collective.taskqueue.redisqueue import RedisTaskQueue
+            from collective.taskqueue.redisqueue import RedisTaskQueue
 
-                if issubclass(task_queue.__class__, RedisTaskQueue):
-                    # Configure asyncore socket map to poll Redis events
-                    self._set_readable_redis(task_queue)
-                else:
-                    self._readable = False
+            if issubclass(task_queue.__class__, RedisTaskQueue):
+                 # Configure asyncore socket map to poll Redis events
+                self._set_readable_redis(task_queue)
             else:
                 self._readable = False
 

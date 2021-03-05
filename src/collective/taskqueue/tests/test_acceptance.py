@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-from collective.taskqueue import taskqueue
-from collective.taskqueue.config import HAS_MSGPACK
-from collective.taskqueue.config import HAS_REDIS
 from collective.taskqueue.testing import REDIS_TASK_QUEUE_ZSERVER_FIXTURE
 from collective.taskqueue.testing import TASK_QUEUE_ZSERVER_FIXTURE
 from collective.taskqueue.testing import ZSERVER_FIXTURE
@@ -149,13 +146,12 @@ def test_suite():
             )
         ]
     )
-    if HAS_REDIS and HAS_MSGPACK:
-        suite.addTests(
-            [
-                layered(
-                    robotsuite.RobotTestSuite("test_acceptance.robot"),
-                    layer=REDIS_TASK_QUEUE_ROBOT_TESTING,
-                )
-            ]
-        )
+    suite.addTests(
+        [
+            layered(
+                robotsuite.RobotTestSuite("test_acceptance.robot"),
+                layer=REDIS_TASK_QUEUE_ROBOT_TESTING,
+            )
+        ]
+    )
     return suite

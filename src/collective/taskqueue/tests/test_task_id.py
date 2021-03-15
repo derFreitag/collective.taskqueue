@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 from collective.taskqueue import taskqueue
 from collective.taskqueue.interfaces import ITaskQueue
-from collective.taskqueue.testing import LocalTaskQueueServerLayer
-from collective.taskqueue.testing import runAsyncTest
-from plone.testing import z2
+from collective.taskqueue.testing import process_async_tasks
+from collective.taskqueue.testing import TASK_QUEUE_FUNCTIONAL_TESTING
+from testfixtures import LogCapture
 from zope.component import getUtility
-from zope.testing.loggingsupport import InstalledHandler
 import logging
 import Queue
 import transaction
@@ -13,25 +12,6 @@ import unittest
 
 
 logger = logging.getLogger("collective.taskqueue")
-
-
-class TaskIdLoggingTaskQueueServerLayer(LocalTaskQueueServerLayer):
-    def setUp(self):
-        super(TaskIdLoggingTaskQueueServerLayer, self).setUp()
-
-        def logging_handler(app, request, response):
-            logger.info(request.getHeader("X-Task-Id"))
-            response.stdout.write("HTTP/1.1 204\r\n")
-            response.stdout.close()
-
-        self["server"].handler = logging_handler
-
-
-TASK_QUEUE_FIXTURE = TaskIdLoggingTaskQueueServerLayer(queue="test-queue")
-
-TASK_QUEUE_FUNCTIONAL_TESTING = z2.FunctionalTesting(
-    bases=(TASK_QUEUE_FIXTURE,), name="TaskQueue:Functional"
-)
 
 
 class TestLocalVolatileTaskQueue(unittest.TestCase):
@@ -44,6 +24,7 @@ class TestLocalVolatileTaskQueue(unittest.TestCase):
         return getUtility(ITaskQueue, name=self.queue)
 
     def setUp(self):
+        self.request = self.layer['request']
         self.task_queue.queue = Queue.Queue()
 
     def _testConsumeFromQueue(self):
@@ -51,12 +32,13 @@ class TestLocalVolatileTaskQueue(unittest.TestCase):
 
     def testTaskId(self):
         self.assertEqual(len(self.task_queue), 0)
-        a = taskqueue.add("/", queue=self.queue)
-        b = taskqueue.add("/Plone", queue=self.queue)
+        a = taskqueue.add("/plone/@@view", queue=self.queue)
+        b = taskqueue.add("/plone/@@view", queue=self.queue)
+        expected_results = ['Task {0} finished'.format(a), 'Task {0} finished'.format(b), ]
         transaction.commit()
         self.assertEqual(len(self.task_queue), 2)
 
-        handler = InstalledHandler("collective.taskqueue")
-        runAsyncTest(self._testConsumeFromQueue)
-        messages = [record.getMessage() for record in handler.records]
-        self.assertEqual(messages[-2:], [a, b])
+        with LogCapture() as output:
+            process_async_tasks(self.request, self.queue)
+        messages = [record.getMessage() for record in output.records if record.levelname == 'INFO']
+        self.assertEqual(sorted(messages), sorted(expected_results))

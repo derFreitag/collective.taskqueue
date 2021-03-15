@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 from collective.taskqueue import taskqueue
 from collective.taskqueue.interfaces import ITaskQueue
-from collective.taskqueue.testing import runAsyncTest
+from collective.taskqueue.testing import process_async_tasks
 from collective.taskqueue.testing import TASK_QUEUE_FUNCTIONAL_TESTING
+from testfixtures import LogCapture
 from zope.component import getUtility
-from zope.testing.loggingsupport import InstalledHandler
 import Queue
 import transaction
-import unittest2 as unittest
+import unittest
 
 
 class TestLocalVolatileTaskQueue(unittest.TestCase):
@@ -20,6 +20,7 @@ class TestLocalVolatileTaskQueue(unittest.TestCase):
         return getUtility(ITaskQueue, name=self.queue)
 
     def setUp(self):
+        self.request = self.layer['request']
         self.task_queue.queue = Queue.Queue()
 
     def testEmptyQueue(self):
@@ -39,32 +40,33 @@ class TestLocalVolatileTaskQueue(unittest.TestCase):
         transaction.commit()
         self.assertEqual(len(self.task_queue), 2)
 
-    def _testConsumeFromQueue(self):
-        self.assertEqual(len(self.task_queue), 0)
-
     def testConsumeFromQueue(self):
         self.assertEqual(len(self.task_queue), 0)
-        taskqueue.add("/", queue=self.queue)
-        taskqueue.add("/Plone", queue=self.queue)
+        taskqueue.add("/plone/@@view", queue=self.queue)
         transaction.commit()
-        self.assertEqual(len(self.task_queue), 2)
+        self.assertEqual(len(self.task_queue), 1)
 
-        handler = InstalledHandler("collective.taskqueue")
-        runAsyncTest(self._testConsumeFromQueue)
-        messages = [record.getMessage() for record in handler.records]
-        self.assertEqual(messages[-2:], ["http://nohost:/", "http://nohost:/Plone"])
+        with LogCapture() as output:
+            process_async_tasks(self.request, self.queue)
+        messages = [record.getMessage() for record in output.records if record.levelname == 'WARNING']
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(
+            messages[0],
+            'Async view /plone/@@view is not callable'
+        )
 
-    def testConsume100FromQueue(self):
+    def testConsume20FromQueue(self):
         self.assertEqual(len(self.task_queue), 0)
         expected_result = []
-        for i in range(100):
-            taskqueue.add("/{0:02d}".format(i), queue=self.queue)
-            expected_result.append("http://nohost:/{0:02d}".format(i))
+        warning_message = 'Async view /plone/@@view?param={0:02d} is not callable'
+        for i in range(20):
+            taskqueue.add("/plone/@@view?param={0:02d}".format(i), queue=self.queue)
+            expected_result.append(warning_message.format(i))
         transaction.commit()
-        self.assertEqual(len(self.task_queue), 100)
+        self.assertEqual(len(self.task_queue), 20)
 
-        handler = InstalledHandler("collective.taskqueue")
-        runAsyncTest(self._testConsumeFromQueue)
-        messages = [record.getMessage() for record in handler.records]
+        with LogCapture() as output:
+            process_async_tasks(self.request, self.queue)
+        messages = [record.getMessage() for record in output.records if record.levelname == 'WARNING']
 
-        self.assertEqual(sorted(messages[-100:]), expected_result)
+        self.assertEqual(sorted(messages), expected_result)

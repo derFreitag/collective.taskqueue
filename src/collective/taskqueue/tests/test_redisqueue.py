@@ -10,10 +10,12 @@ class TestRedisTaskQueue(TestLocalVolatileTaskQueue):
     queue = "test-queue"
 
     def setUp(self):
+        self.request = self.layer['request']
         while len(self.task_queue):
             task = self.task_queue.get(consumer_name="default")
             self.task_queue.task_done(
                 task, status_line="HTTP/1.1 200",
                 consumer_name="default", consumer_length=0,
             )
+
 

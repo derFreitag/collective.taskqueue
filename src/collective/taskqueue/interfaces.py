@@ -13,7 +13,7 @@ class ITaskQueue(Interface):
         returns a value.
         """
 
-    def add(url, method, params, headers, payload):
+    def add(url, method, params, headers):
         """Create task and queue it after successful transaction"""
 
     def put(task):

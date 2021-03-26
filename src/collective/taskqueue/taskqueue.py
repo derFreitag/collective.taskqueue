@@ -99,8 +99,8 @@ class TaskQueueBase(object):
                 return term.token
         return None
 
-    def add(self, url=None, method="GET", params=None, headers=None, payload=_marker):
-        task_id, task = make_task(url, method, params, headers, payload)
+    def add(self, url=None, method="GET", params=None, headers=None):
+        task_id, task = make_task(url, method, params, headers)
         get_transaction().join(self.transaction_data_manager(self, task))
         return task_id
 
@@ -137,7 +137,7 @@ class TaskQueuesVocabulary(object):
         return SimpleVocabulary.fromItems(items)
 
 
-def make_task(url=None, method="GET", params=None, headers=None, payload=_marker):
+def make_task(url=None, method="GET", params=None, headers=None):
     assert url, "Url not given"
 
     request = getRequest()
@@ -158,21 +158,9 @@ def make_task(url=None, method="GET", params=None, headers=None, payload=_marker
             key = "-".join(map(str.capitalize, key[5:].split("_")))
             if key != "User-Agent" and not key in headers:
                 headers[key] = value
-        elif key.startswith("CONTENT_") and payload is _marker:
+        elif key.startswith("CONTENT_"):
             key = "-".join(map(str.capitalize, key.split("_")))
             headers[key] = value
-
-    # Copy payload from re-seekable StringIO when not explicitly given:
-    if (
-        payload is _marker
-        and request.stdin is not None
-        and type(request.stdin) is not file
-    ):  # noqa
-        request.stdin.seek(0)
-        payload = request.stdin.read()
-        request.stdin.seek(0)
-    elif payload is _marker:
-        payload = ""
 
     # Set special X-Task-Id -header to identify each message
     headers["X-Task-Id"] = str(uuid.uuid4())
@@ -198,14 +186,13 @@ def make_task(url=None, method="GET", params=None, headers=None, payload=_marker
             "{0:s}: {1:s}".format(key, safe_str(value))
             for key, value in sorted(headers.items())
         ],
-        "payload": payload,
     }
 
     return headers["X-Task-Id"], task
 
 
 def add(
-    url=None, method="GET", params=None, headers=None, payload=_marker, queue=_marker
+    url=None, method="GET", params=None, headers=None, queue=_marker
 ):
 
     vocabulary = getUtility(IVocabularyFactory, "collective.taskqueue.queues")()
@@ -224,7 +211,7 @@ def add(
         )
         task_queue = getUtility(ITaskQueue, name=fallback)
 
-    return task_queue.add(url, method, params, headers, payload)
+    return task_queue.add(url, method, params, headers)
 
 
 def reset(queue=_marker):

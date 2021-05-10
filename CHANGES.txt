@@ -1,7 +1,7 @@
 Changelog
 =========
 
-1.0.0.post3 (unreleased)
+1.0.0.post3 (2021-05-10)
 ------------------------
 
 - Refactor queues configuration to not use ZConfig,

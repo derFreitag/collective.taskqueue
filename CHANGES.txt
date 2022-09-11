@@ -1,7 +1,7 @@
 Changelog
 =========
 
-1.0.0.post5 (unreleased)
+1.0.0.post5 (2022-09-11)
 ------------------------
 
 - More py3 compatibility fixes.

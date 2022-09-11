@@ -4,8 +4,8 @@ Changelog
 1.0.0.post7 (unreleased)
 ------------------------
 
-- Nothing changed yet.
-
+- More py3 compatibility fixes.
+  [gforcada]
 
 1.0.0.post6 (2022-09-11)
 ------------------------

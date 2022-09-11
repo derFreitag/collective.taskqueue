@@ -126,7 +126,7 @@ class RedisTaskQueue(TaskQueueBase):
     def _k4_in_payload(self, msg):
         if msg:
             unpacked_data = self.deserialize(msg)
-            url = unpacked_data['url']
+            url = unpacked_data[b'url'].decode()
             return '/@@k4-postprocess' in url
 
     def _warn_too_much_looping(self):

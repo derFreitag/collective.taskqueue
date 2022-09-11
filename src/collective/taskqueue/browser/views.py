@@ -103,7 +103,8 @@ class ProcessTaskView(BrowserView):
         It looks like this:
         ['X-Task-Id: b00f33d5-0190-4bc6-8795-447ea4e56a67', 'X-Task-User-Id: xxx']
         """
-        for header in task['headers']:
+        for header in task[b'headers']:
+            header = header.encode()
             if 'X-Task-Id' in header:
                 _, task_id = header.split(' ')
                 break

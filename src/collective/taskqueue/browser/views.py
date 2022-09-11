@@ -50,7 +50,7 @@ class ProcessTaskView(BrowserView):
         return task_queue
 
     def process_task(self, task):
-        full_url = task['url']
+        full_url = task[b'url'].decode()
         path, params = self._split_url(full_url)
         self._prepare_request(params)
         self._call_async_view(path, full_url)

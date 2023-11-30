@@ -1,8 +1,8 @@
 Changelog
 =========
 
-0.8.3 (unreleased)
-------------------
+2.0.0.dev0 (2023-11-30)
+-----------------------
 
 - Loop through all the elements in the queue looking for tasks related to k4 imports.
   A hacked way to have some priority to a fixed set of tasks.

@@ -1,7 +1,7 @@
 Changelog
 =========
 
-2.0.0.post1 (unreleased)
+2.0.0.post1 (2026-05-22)
 ------------------------
 
 - Native namespaces

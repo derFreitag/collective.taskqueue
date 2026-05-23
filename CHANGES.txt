@@ -4,8 +4,8 @@ Changelog
 2.0.0.post2 (unreleased)
 ------------------------
 
-- Nothing changed yet.
-
+- Fix native namespaces
+  [gforcada]
 
 2.0.0.post1 (2026-05-22)
 ------------------------
@@ -13,12 +13,10 @@ Changelog
 - Native namespaces
   [gforcada]
 
-
 2.0.0.post0 (2024-03-01)
 ------------------------
 
 - Nothing changed yet.
-
 
 2.0.0.dev0 (2023-11-30)
 -----------------------
